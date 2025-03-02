@@ -1,0 +1,60 @@
+// String Methods Demonstration
+let str = "JavaScript is a powerful language";
+// Convert to Uppercase
+console.log("Uppercase:", str.toUpperCase());
+// Convert to Lowercase
+console.log("Lowercase:", str.toLowerCase());
+// Find length of string
+console.log("Length:", str.length);
+// Replace a word
+console.log("Replace 'powerful' with 'versatile':", str.replace("powerful", "versatile"));
+// Split string into an array
+let wordsArray = str.split(" ");
+console.log("String to Array:", wordsArray);
+// Check if string contains a word
+console.log("Includes 'powerful'?", str.includes("powerful"));
+// Extract a substring
+console.log("Substring (0-10):", str.substring(0, 10));
+// Trim whitespace (for demo, adding extra spaces)
+let spacedStr = "  Hello JavaScript  ";
+console.log("Trimmed String:", spacedStr.trim());
+// Get character at index
+console.log("Character at index 5:", str.charAt(5));
+// Concatenation
+console.log("Concatenated String:", str.concat(" and widely used!"));
+
+// ---------------------------------------------
+// Array Methods Demonstration
+let numbers = [10, 20, 30, 40, 50];
+// Add element at the end
+numbers.push(60);
+console.log("After Push:", numbers);
+// Remove last element
+numbers.pop();
+console.log("After Pop:", numbers);
+// Add element at the beginning
+numbers.unshift(5);
+console.log("After Unshift:", numbers);
+// Remove first element
+numbers.shift();
+console.log("After Shift:", numbers);
+// Find index of an element
+console.log("Index of 30:", numbers.indexOf(30));
+// Slice array (extract part of array)
+console.log("Sliced Array (1-3):", numbers.slice(1, 3));
+// Splice array (remove & insert elements)
+numbers.splice(2, 1, 35);
+console.log("After Splice (replace index 2 with 35):", numbers);
+// Reverse array
+console.log("Reversed Array:", numbers.reverse());
+// Sort array (ascending)
+console.log("Sorted Array:", numbers.sort((a, b) => a - b));
+// Filter even numbers
+let evenNumbers = numbers.filter(num => num % 2 === 0);
+console.log("Filtered Even Numbers:", evenNumbers);
+// Map (double values)
+let doubledNumbers = numbers.map(num => num * 2);
+console.log("Doubled Numbers:", doubledNumbers);
+// Reduce (sum of array)
+let sum = numbers.reduce((acc, num) => acc + num, 0);
+console.log("Sum of Numbers:", sum);
