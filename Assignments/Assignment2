@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  SectionList,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+} from 'react-native';
+
+const CONTACTS = [
+  { name: 'Ali', number: '1234567890', group: 'Family' },
+  { name: 'Sara', number: '2345678901', group: 'Friends' },
+  { name: 'Zain', number: '3456789012', group: 'Work' },
+  { name: 'Fatima', number: '4567890123', group: 'Family' },
+  { name: 'Hamza', number: '5678901234', group: 'Work' },
+  { name: 'Ayesha', number: '6789012345', group: 'Friends' },
+  { name: 'Usman', number: '7890123456', group: 'Family' },
+  { name: 'Hina', number: '8901234567', group: 'Work' },
+  { name: 'Bilal', number: '9012345678', group: 'Friends' },
+  { name: 'Nida', number: '0123456789', group: 'Family' },
+];
+
+export default function App() {
+  const [search, setSearch] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  const groupedContacts = ['Family', 'Friends', 'Work'].map(group => ({
+    title: group,
+    data: CONTACTS.filter(
+      c =>
+        c.group === group &&
+        (c.name.toLowerCase().includes(search.toLowerCase()) ||
+         c.number.includes(search))
+    ),
+  })).filter(section => section.data.length > 0);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Contact Manager</Text>
+      <TextInput
+        placeholder="Search by name or number"
+        style={styles.input}
+        onChangeText={setSearch}
+        value={search}
+      />
+      <SectionList
+        sections={groupedContacts}
+        keyExtractor={(item, index) => item.name + index}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.contactItem}
+            onPress={() => setSelectedContact(item)}
+          >
+            <Text>{item.name} - {item.number}</Text>
+          </TouchableOpacity>
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
+      />
+      {selectedContact && (
+        <Modal
+          transparent
+          animationType="slide"
+          visible={!!selectedContact}
+          onRequestClose={() => setSelectedContact(null)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>Contact Details</Text>
+              <Text>Name: {selectedContact.name}</Text>
+              <Text>Number: {selectedContact.number}</Text>
+              <Text>Group: {selectedContact.group}</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setSelectedContact(null)}
+              >
+                <Text style={styles.closeText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 20, flex: 1, backgroundColor: '#fff' },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  input: {
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 5,
+    padding: 10, marginBottom: 10
+  },
+  sectionHeader: {
+    fontWeight: 'bold', fontSize: 18, backgroundColor: '#eee', padding: 5
+  },
+  contactItem: {
+    padding: 10, borderBottomWidth: 1, borderBottomColor: '#ddd'
+  },
+  modalBackground: {
+    flex: 1, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  modal: {
+    width: 300, padding: 20, backgroundColor: '#fff',
+    borderRadius: 10, alignItems: 'center'
+  },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  closeButton: {
+    marginTop: 20, backgroundColor: '#2196F3', padding: 10, borderRadius: 5
+  },
+  closeText: { color: 'white' }
+});
