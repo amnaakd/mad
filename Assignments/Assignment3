@@ -1,0 +1,120 @@
+import React, { useState, useEffect } from 'react';
+import { Text, View, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+const Tab = createBottomTabNavigator();
+
+function HomeScreen() {
+  const [city, setCity] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setCity('Permission denied');
+        setLoading(false);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      let reverseGeocode = await Location.reverseGeocodeAsync(location.coords);
+      const cityName = reverseGeocode[0]?.city || 'Unknown';
+      setCity(cityName);
+      setLoading(false);
+    })();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Your City:</Text>
+      {loading ? <ActivityIndicator size="large" /> : <Text style={styles.value}>{city}</Text>}
+    </View>
+  );
+}
+
+function ProfileScreen({ route, navigation }) {
+  const [name, setName] = useState(route.params?.name || 'John Doe');
+
+  useEffect(() => {
+    navigation.setOptions({ title: name });
+  }, [name]);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Edit Your Name:</Text>
+      <TextInput
+        style={styles.input}
+        value={name}
+        onChangeText={text => setName(text)}
+        placeholder="Enter your name"
+      />
+    </View>
+  );
+}
+
+function SettingsScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings</Text>
+      <Text>This is a placeholder screen.</Text>
+    </View>
+  );
+}
+
+export default function App() {
+  const [userName, setUserName] = useState('John Doe');
+
+  return (
+    <NavigationContainer>
+      <Tab.Navigator>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen
+          name="Profile"
+          children={(props) => (
+            <ProfileScreen
+              {...props}
+              route={{ ...props.route, params: { name: userName } }}
+              navigation={{
+                ...props.navigation,
+                setOptions: (options) => {
+                  setUserName(options.title);
+                  props.navigation.setOptions(options);
+                }
+              }}
+            />
+          )}
+          options={{ title: userName }}
+        />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 10
+  },
+  value: {
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
+  input: {
+    height: 40,
+    borderWidth: 1,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 10
+  }
+});
