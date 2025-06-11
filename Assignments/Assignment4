@@ -1,0 +1,163 @@
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { Text, View, Button, ScrollView, StyleSheet } from 'react-native';
+import axios from 'axios';
+import { Accelerometer } from 'expo-sensors';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+const ApiContext = createContext();
+
+const ApiProvider = ({ children }) => {
+  const [weatherData, setWeatherData] = useState(null);
+  const [postData, setPostData] = useState(null);
+  const [putData, setPutData] = useState(null);
+
+  return (
+    <ApiContext.Provider value={{ weatherData, setWeatherData, postData, setPostData, putData, setPutData }}>
+      {children}
+    </ApiContext.Provider>
+  );
+};
+
+const HomeScreen = ({ navigation }) => {
+  const { weatherData, setWeatherData, postData, setPostData, putData, setPutData } = useContext(ApiContext);
+
+  const fetchWeather = async () => {
+    try {
+      const res = await axios.get('https://api.open-meteo.com/v1/forecast?latitude=35&longitude=139&current_weather=true');
+      setWeatherData({
+        temp: res.data.current_weather.temperature,
+        wind: res.data.current_weather.windspeed,
+      });
+    } catch (err) {
+      alert('Weather API failed');
+    }
+  };
+const simulatePost = async () => {
+  try {
+    const response = await fetch('https://reqres.in/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Alice',
+        job: 'Developer',
+      }),
+    });
+
+    const data = await response.json();
+    console.log('POST success:', data);
+    setPostData({
+      name: data.name || 'Alice',
+      job: data.job || 'Developer',
+    });
+  } catch (err) {
+    alert('POST failed');
+    console.log('POST error:', err.message);
+  }
+};
+
+const simulatePut = async () => {
+  try {
+    const response = await fetch('https://reqres.in/api/users/2', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Alice Updated',
+        job: 'Lead Developer',
+      }),
+    });
+
+    const data = await response.json();
+    console.log('PUT success:', data);
+    setPutData({
+      name: data.name || 'Alice Updated',
+      job: data.job || 'Lead Developer',
+    });
+  } catch (err) {
+    alert('PUT failed');
+    console.log('PUT error:', err.message);
+  }
+};
+
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Button title="GET Weather" onPress={fetchWeather} />
+      <Button title="POST User" onPress={simulatePost} />
+      <Button title="PUT Update" onPress={simulatePut} />
+      <Button title="Go to Sensor" onPress={() => navigation.navigate('Sensor')} />
+
+      {weatherData && (
+        <View style={styles.card}>
+          <Text style={styles.title}> Weather</Text>
+          <Text>Temp: {weatherData.temp} °C</Text>
+          <Text>Wind: {weatherData.wind} km/h</Text>
+        </View>
+      )}
+
+     {postData && (
+  <View style={styles.card}>
+    <Text style={styles.title}> POST</Text>
+    <Text>Name: {postData.name}</Text>
+    <Text>Job: {postData.job}</Text>
+  </View>
+)}
+
+{putData && (
+  <View style={styles.card}>
+    <Text style={styles.title}> PUT</Text>
+    <Text>Name: {putData.name}</Text>
+    <Text>Job: {putData.job}</Text>
+  </View>
+)}
+
+    </ScrollView>
+  );
+};
+
+const SensorScreen = () => {
+  const [data, setData] = useState({ x: 0, y: 0, z: 0 });
+
+  useEffect(() => {
+    const sub = Accelerometer.addListener(accel => {
+      setData(accel);
+    });
+    Accelerometer.setUpdateInterval(500);
+    return () => sub.remove();
+  }, []);
+
+  return (
+    <View style={styles.sensorContainer}>
+      <Text style={styles.title}> Accelerometer</Text>
+      <Text>X: {data.x.toFixed(2)}</Text>
+      <Text>Y: {data.y.toFixed(2)}</Text>
+      <Text>Z: {data.z.toFixed(2)}</Text>
+    </View>
+  );
+};
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <ApiProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Sensor" component={SensorScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ApiProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 20 },
+  card: { backgroundColor: '#e7e7e7', padding: 15, marginVertical: 10, borderRadius: 8 },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+  sensorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});
